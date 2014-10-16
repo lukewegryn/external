@@ -103,6 +103,7 @@ int main(int argc, char *argv[])
 				{
 					isStable = true;
 				}
+				temp = upTemp;
 				sendFloat(child_1, temp, pid);
 				sendFloat(child_2, temp, pid);
 			}
