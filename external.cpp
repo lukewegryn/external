@@ -101,24 +101,34 @@ int main(int argc, char *argv[])
 				qout << "Process " << pid << " current temperature " << upTemp << endl;
 				if(qAbs(upTemp - temp) <= .01)
 				{
+					temp = upTemp;
 					isStable = true;
+					sendFloat(child_1, temp, 20);
+					sendFloat(child_2, temp, 20);
 				}
-				temp = upTemp;
-				sendFloat(child_1, temp, pid);
-				sendFloat(child_2, temp, pid);
+				else
+				{
+					temp = upTemp;
+					sendFloat(child_1, temp, pid);
+					sendFloat(child_2, temp, pid);
+				}
 			}
 
 		}
 		if(pid == 1 || pid == 2)
-		{	if(isStable)
-			{
-
-			}
+		{	
 			if(hasMessages(mqueue))
 			{
 				float rPid = 10;
 				float value = receiveFloat(mqueue, rPid);
-				if(rPid == 0)
+				if(rPid == 20)
+				{
+					isStable = true;
+					sendFloat(child_1, temp, 20);
+					sendFloat(child_1, temp, 20);
+				}
+
+				else if(rPid == 0)
 				{
 					float downTemp = (temp + value)/2.0;
 					temp = downTemp;
@@ -149,10 +159,17 @@ int main(int argc, char *argv[])
 			{
 				float rPid;
 				parentTemp = receiveFloat(mqueue, rPid);
-				downTemp = (temp + parentTemp)/2.0;
-				temp = downTemp;
-				sendFloat(parent, downTemp, pid); //true flags it as sent up 
-				qout << "Process " << pid << " current temperature " << downTemp << endl;
+				if(rPid == 20)
+				{
+					isStable = true;
+				}
+				else
+				{
+					downTemp = (temp + parentTemp)/2.0;
+					temp = downTemp;
+					sendFloat(parent, downTemp, pid); //true flags it as sent up 
+					qout << "Process " << pid << " current temperature " << downTemp << endl;
+				}
 			}
 		}
 	}
